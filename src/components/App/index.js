@@ -18,7 +18,8 @@ import {
 
 class App extends Component {
 
-     _isMounted=false;
+   _isMounted = false;
+   _callcnt = 0;
 
    constructor(props) {
 
@@ -26,7 +27,7 @@ class App extends Component {
 
       this.state = {
          results: null,
-         searchKey: '',
+         searchKey: DEFAULT_QUERY,
          searchTerm: DEFAULT_QUERY,
          error: null,
       };
@@ -47,7 +48,6 @@ class App extends Component {
       const oldHits = results && results[searchKey]
             ? results[searchKey].hits
             : [];
-
       const updatedHits = [
             ...oldHits,
             ...hits
@@ -75,25 +75,32 @@ class App extends Component {
    }
 
    onSearchSubmit(event) {
-      const { searchTerm } = this.state;
-      this.setState({ searchKey: searchTerm });
+    event.preventDefault();
+     const { ...searchTerm } = this.state;
+     this.setState({ searchKey: searchTerm });
       if(this.needsToSearchTopStories(searchTerm)) {
-         this.fetchSearchTopStories(searchTerm, );
+         this.fetchSearchTopStories(searchTerm);
       }
-      event.preventDefault();
   }
 
    onSearchChange(event) {
-        this.setState({searchTerm: event.target.value })
+       this.setState({searchTerm: event.target.value })
    }
 
 
   componentWillUnmount() {
     this._isMounted = false;
-  }
+   }
+
+   componentDidMount() {
+      this._isMounted = true;
+      const { searchTerm } = this.state;
+      this.fetchSearchTopStories(searchTerm);
+   }
+
 
   fetchSearchTopStories(searchTerm, page=0) {
-    axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}\${page}&{PARAM_HPP}${DEFAULT_HPP}`)
+    axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(result => this._isMounted && this.setSearchTopStories(result.data))
       .catch(error => this._isMounted && this.setState({ error }));
   }
@@ -106,6 +113,8 @@ class App extends Component {
             error
      } = this.state;
 
+     console.log(++this._callcnt);
+     console.log("render");
      const page = (
           results &&
           results[searchKey] &&
@@ -115,7 +124,7 @@ class App extends Component {
      const list = (
           results &&
           results[searchKey] &&
-          results[searchKey].page
+          results[searchKey].hits
      ) || [];
 
     return (
@@ -147,7 +156,6 @@ class App extends Component {
     );
   }
 }
-
 
 if (module.hot) {
   module.hot.accept();
