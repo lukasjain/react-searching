@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './index.css';
+import PropTypes from 'prop-types';
 
+import './index.css';
 import Button from '../Button';
 import Search from '../Search';
 import Table from '../Table';
@@ -142,6 +143,7 @@ class App extends Component {
 
              <div className="interactions">
                <p>Something went wrong.</p>
+               <h> i think it is very good.</h>
              </div>
             :
                <Table
@@ -162,3 +164,9 @@ if (module.hot) {
 }
 
 export default App;
+
+export {
+  Button,
+  Search,
+  Table
+};
